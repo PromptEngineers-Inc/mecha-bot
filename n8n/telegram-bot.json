@@ -3,7 +3,7 @@
     {
       "parameters": {
         "options": {
-          "systemMessage": "Ты консультант по тематике машиностроения."
+          "systemMessage": "Ты опытный инженер, эксперт в области машиностроения и обработки металлов. Отвечай максимально подробно и с техническими подробностями. "
         }
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
@@ -22,7 +22,9 @@
       "parameters": {
         "mode": "retrieve-as-tool",
         "toolName": "kn_base",
-        "toolDescription": "Полезная информация"
+        "toolDescription": "Тестирование металлов Одинг",
+        "memoryKey": "mecha_vector_store_key",
+        "includeDocumentMetadata": false
       },
       "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
       "typeVersion": 1.1,
@@ -37,17 +39,16 @@
       "parameters": {
         "model": {
           "__rl": true,
-          "value": "gpt://b1g8i6bj34avp7kulp7h/yandexgpt-lite/latest",
-          "mode": "list",
-          "cachedResultName": "gpt://b1g8i6bj34avp7kulp7h/yandexgpt-lite/latest"
+          "value": "=gpt://b1g8i6bj34avp7kulp7h/yandexgpt-lite/latest",
+          "mode": "id"
         },
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
       "typeVersion": 1.2,
       "position": [
-        -112,
-        176
+        -208,
+        160
       ],
       "id": "cad20333-7077-455a-a61c-096513305be4",
       "name": "OpenAI Chat Model",
@@ -65,8 +66,8 @@
       "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
       "typeVersion": 1,
       "position": [
-        208,
-        304
+        128,
+        528
       ],
       "id": "7792dcc3-b6de-4b94-bb0a-fd3344f55fc1",
       "name": "Embeddings Ollama",
@@ -95,8 +96,8 @@
       "typeVersion": 1,
       "credentials": {
         "telegramApi": {
-          "id": "excJnzPpQwwol2gj",
-          "name": "test_010625_bot"
+          "id": "euaVhRp6OApBbppC",
+          "name": "mecha_consult_bot"
         }
       }
     },
@@ -145,8 +146,8 @@
       "webhookId": "a01826dc-7b4c-4446-acfc-cf2849435b08",
       "credentials": {
         "telegramApi": {
-          "id": "excJnzPpQwwol2gj",
-          "name": "test_010625_bot"
+          "id": "euaVhRp6OApBbppC",
+          "name": "mecha_consult_bot"
         }
       }
     },
@@ -155,11 +156,93 @@
       "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
       "typeVersion": 1.3,
       "position": [
-        64,
+        16,
         144
       ],
-      "id": "18255e9a-2876-4d8c-94f9-1dfc879e792e",
+      "id": "7a2766ec-5b3b-4f02-9866-fdc84b8a78de",
       "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "fileSelector": "/files/mecha_data/oding.txt",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        -1072,
+        128
+      ],
+      "id": "10c2afd9-de78-434e-ba7e-c36f8079aebb",
+      "name": "Read/Write Files from Disk",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1344,
+        128
+      ],
+      "id": "aa785a97-7993-4c97-b894-1aab312d2d9a",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -848,
+        128
+      ],
+      "id": "49bc2fd5-d88d-40a5-84e1-f9e8b13a3c02",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "memoryKey": "mecha_vector_store_key",
+        "clearStore": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+      "typeVersion": 1.1,
+      "position": [
+        -560,
+        128
+      ],
+      "id": "3d998336-e1ff-4c9a-8e53-8b37877f86d3",
+      "name": "Simple Vector Store"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        432
+      ],
+      "id": "ea955e8b-5c2a-4439-a73e-429df9049bc3",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkSize": 1024,
+        "chunkOverlap": 256
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        640
+      ],
+      "id": "8df3d196-2e1c-44a9-84b6-1ee2443d25b1",
+      "name": "Character Text Splitter"
     }
   ],
   "connections": {
@@ -203,6 +286,11 @@
             "node": "Simple Vector Store1",
             "type": "ai_embedding",
             "index": 0
+          },
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_embedding",
+            "index": 0
           }
         ]
       ]
@@ -235,6 +323,61 @@
           {
             "node": "AI Agent",
             "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Simple Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
             "index": 0
           }
         ]
